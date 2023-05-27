@@ -238,44 +238,47 @@ if __name__ == '__main__':
                 azienda['Prezzo'] = prezzo_prodotto
                 azienda['Sconto'] = sconto
                 azienda['Prezzo consigliato'] = prezzo_consigliato
-                nome_azienda_match = re.search(r'Nome azienda:\n(.+)', testo_pulito)
-                azienda['Nome azienda:'] = nome_azienda_match.group(1).strip() if nome_azienda_match else None
-                azienda['N. Feed Back'] = valutazioni
-                tipo_attivita_match = re.search(r'Tipo di attività:\n(.+)', testo_pulito)
-                azienda['Tipo di attività:'] = tipo_attivita_match.group(1).strip() if tipo_attivita_match else None
+                try:
+                    nome_azienda_match = re.search(r'Nome azienda:\n(.+)', testo_pulito)
+                    azienda['Nome azienda:'] = nome_azienda_match.group(1).strip() if nome_azienda_match else None
+                    azienda['N. Feed Back'] = valutazioni
+                    tipo_attivita_match = re.search(r'Tipo di attività:\n(.+)', testo_pulito)
+                    azienda['Tipo di attività:'] = tipo_attivita_match.group(1).strip() if tipo_attivita_match else None
 
-                numero_iscrizione_match = re.search(r'Numero di iscrizione al registro delle imprese:\n(.+)',
-                                                    testo_pulito)
-                azienda['Numero di iscrizione al registro delle imprese:'] = numero_iscrizione_match.group(
-                    1).strip() if numero_iscrizione_match else None
-                # FILTRO P.IVA SE GIA' ESISTE
-                numero_partita_iva_match = re.search(r'Numero di partita IVA:\n(.+)', testo_pulito)
-                azienda['Numero di partita IVA:'] = numero_partita_iva_match.group(
-                    1).strip() if numero_partita_iva_match else None
+                    numero_iscrizione_match = re.search(r'Numero di iscrizione al registro delle imprese:\n(.+)',
+                                                        testo_pulito)
+                    azienda['Numero di iscrizione al registro delle imprese:'] = numero_iscrizione_match.group(
+                        1).strip() if numero_iscrizione_match else None
+                    # FILTRO P.IVA SE GIA' ESISTE
+                    numero_partita_iva_match = re.search(r'Numero di partita IVA:\n(.+)', testo_pulito)
+                    azienda['Numero di partita IVA:'] = numero_partita_iva_match.group(
+                        1).strip() if numero_partita_iva_match else None
 
-                if cerca_elemento(azienda['Numero di partita IVA:'], group_by_IVA):
+                    if cerca_elemento(azienda['Numero di partita IVA:'], group_by_IVA):
+                        continue
+                    group_by_IVA.append(azienda['Numero di partita IVA:'])
+
+                    numero_telefono_match = re.search(r'Numero di telefono:\n(.+)', testo_pulito)
+                    azienda['Numero di telefono:'] = numero_telefono_match.group(
+                        1).strip() if numero_telefono_match else None
+
+                    indirizzo_servizio_clienti_match = re.search(r'Indirizzo Servizio clienti:\n(.+)', testo_pulito)
+                    azienda['Indirizzo Servizio clienti:'] = indirizzo_servizio_clienti_match.group(
+                        1).strip() if indirizzo_servizio_clienti_match else None
+
+                    indirizzo_aziendale_match = re.search(r'Indirizzo aziendale:\n(.+)', testo_pulito)
+                    azienda['Indirizzo aziendale:'] = indirizzo_aziendale_match.group(
+                        1).strip() if indirizzo_aziendale_match else None
+                    # formattazione
+                    parole_da_eliminare = list(azienda.keys())
+                    for chiave, valore in azienda.items():
+                        if valore is not None:
+                            for parola in parole_da_eliminare:
+                                valore = valore.replace(parola, '')
+                            valore = html.unescape(valore)
+                            azienda[chiave] = valore
+                except TypeError as te:
                     continue
-                group_by_IVA.append(azienda['Numero di partita IVA:'])
-
-                numero_telefono_match = re.search(r'Numero di telefono:\n(.+)', testo_pulito)
-                azienda['Numero di telefono:'] = numero_telefono_match.group(
-                    1).strip() if numero_telefono_match else None
-
-                indirizzo_servizio_clienti_match = re.search(r'Indirizzo Servizio clienti:\n(.+)', testo_pulito)
-                azienda['Indirizzo Servizio clienti:'] = indirizzo_servizio_clienti_match.group(
-                    1).strip() if indirizzo_servizio_clienti_match else None
-
-                indirizzo_aziendale_match = re.search(r'Indirizzo aziendale:\n(.+)', testo_pulito)
-                azienda['Indirizzo aziendale:'] = indirizzo_aziendale_match.group(
-                    1).strip() if indirizzo_aziendale_match else None
-                # formattazione
-                parole_da_eliminare = list(azienda.keys())
-                for chiave, valore in azienda.items():
-                    if valore is not None:
-                        for parola in parole_da_eliminare:
-                            valore = valore.replace(parola, '')
-                        valore = html.unescape(valore)
-                        azienda[chiave] = valore
 
                 print("-------TROVO EMAIL----------")
                 html_content = seller_webpage.text
@@ -287,7 +290,7 @@ if __name__ == '__main__':
                 azienda['Emails'] = re.findall(email_regex, decoded_html)
             print(azienda)
             # Aggiungi il contenuto del dizionario al file CSV
-            filename = 'reportAmazon.csv'  # Sostituisci con il nome del file desiderato
+            filename = '../reportAmazon.csv'  # Sostituisci con il nome del file desiderato
 
             with open(filename, 'a', newline='', encoding='utf-8') as file:
                 writer = csv.DictWriter(file, fieldnames=azienda.keys())

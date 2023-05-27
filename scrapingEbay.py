@@ -130,14 +130,21 @@ if __name__ == '__main__':
             print(prezzo_prodotto)
             azienda['Prezzo'] = prezzo_prodotto
             # ESTRAZIONE nome venditore e vetrina
-            seller_link = new_soup.find("div", attrs={"class": "ux-seller-section__item--seller"}).find('a')
-            azienda['Nome azienda:'] = seller_link.text.strip()
-            azienda['Vetrina'] = seller_link.get('href')
+            try:
+                seller_link = new_soup.find("div", attrs={"class": "ux-seller-section__item--seller"}).find('a')
+                azienda['Nome azienda:'] = seller_link.text.strip()
+                azienda['Vetrina'] = seller_link.get('href')
+            except AttributeError as ae:
+                azienda['Nome azienda:'] = None
+                azienda['Vetrina'] = None
             # ESTRAZIONE N. Feed Back venditore
-            num_feed_back = new_soup.find("div", attrs={"class": "ux-seller-section__item--seller"}). \
-                find('a', attrs={'href': "#LISTING_FRAME_MODULE"}). \
-                find('span', attrs={'class', 'ux-textspans ux-textspans--PSEUDOLINK'}).text
-            azienda['N. Feed Back'] = num_feed_back
+            try:
+                num_feed_back = new_soup.find("div", attrs={"class": "ux-seller-section__item--seller"}). \
+                    find('a', attrs={'href': "#LISTING_FRAME_MODULE"}). \
+                    find('span', attrs={'class', 'ux-textspans ux-textspans--PSEUDOLINK'}).text
+                azienda['N. Feed Back'] = num_feed_back
+            except AttributeError as ae:
+                azienda['N. Feed Back'] = None
             # ESTRAZIONE INFO VENDITORE
             try:
                 info_venditore = new_soup.find("div", attrs={'class': 'vim d-business-seller'}).text
@@ -194,7 +201,7 @@ if __name__ == '__main__':
             azienda['Emails'] = list(dict.fromkeys(azienda['Emails']))
             print(azienda)
             # Aggiungi il contenuto del dizionario al file CSV
-            filename = 'reportEbay.csv'  # Sostituisci con il nome del file desiderato
+            filename = '../reportEbay.csv'  # Sostituisci con il nome del file desiderato
 
             with open(filename, 'a', newline='', encoding='utf-8') as file:
                 writer = csv.DictWriter(file, fieldnames=azienda.keys())
