@@ -290,7 +290,7 @@ if __name__ == '__main__':
                 azienda['Emails'] = re.findall(email_regex, decoded_html)
             print(azienda)
             # Aggiungi il contenuto del dizionario al file CSV
-            filename = '../reportAmazon.csv'  # Sostituisci con il nome del file desiderato
+            filename = './reportAmazon.csv'  # Sostituisci con il nome del file desiderato
 
             with open(filename, 'a', newline='', encoding='utf-8') as file:
                 writer = csv.DictWriter(file, fieldnames=azienda.keys())

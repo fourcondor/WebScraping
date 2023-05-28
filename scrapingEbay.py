@@ -201,7 +201,7 @@ if __name__ == '__main__':
             azienda['Emails'] = list(dict.fromkeys(azienda['Emails']))
             print(azienda)
             # Aggiungi il contenuto del dizionario al file CSV
-            filename = '../reportEbay.csv'  # Sostituisci con il nome del file desiderato
+            filename = './reportEbay.csv'  # Sostituisci con il nome del file desiderato
 
             with open(filename, 'a', newline='', encoding='utf-8') as file:
                 writer = csv.DictWriter(file, fieldnames=azienda.keys())
