@@ -4,6 +4,7 @@ import requests
 import re
 import html
 import unicodedata
+import scraping
 
 # Crea il dizionario con gli attributi
 azienda = {
@@ -25,8 +26,6 @@ azienda = {
     'Emails': []
 }
 
-# USER AGENT
-user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'
 
 # COOKIE
 cookie_value = 'LPAZe1kNRLuVDxtZxtBZGxDp3D02Q9VDbKPkVsZ3Cu+gHOuI8b7EvDI+' \
@@ -37,7 +36,7 @@ cookie_value = 'LPAZe1kNRLuVDxtZxtBZGxDp3D02Q9VDbKPkVsZ3Cu+gHOuI8b7EvDI+' \
 URL = "https://www.amazon.it/b?ie=UTF8&node=13773664031"
 
 HEADERS = ({
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36',
+    'User-Agent': scraping.generate_random_user_agent(),
     'Accept-Language': 'en-US, en;q=0.5'})
 
 group_by_IVA = []
@@ -50,6 +49,7 @@ def is_solo_numero(variabile):
         return True
     except ValueError:
         return False
+
 
 def menu():
     print("HELLO MR. Scraper")
@@ -67,8 +67,9 @@ def menu():
         print("WHAT ARE YOU DOING!")
         choice = input()
     lista = list(categories_links)
-    print(f"Connecting to {lista[int(choice)-1].get('href')}")
-    return lista[int(choice)-1].get('href')
+    print(f"Connecting to {lista[int(choice) - 1].get('href')}")
+    return lista[int(choice) - 1].get('href')
+
 
 def cerca_elemento(elemento, lista):
     if (elemento in lista):

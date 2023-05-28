@@ -4,6 +4,7 @@ import requests
 import re
 import html
 import unicodedata
+import scraping
 
 # Crea il dizionario con gli attributi
 azienda = {
@@ -23,8 +24,6 @@ azienda = {
     'Emails': []
 }
 
-# USER AGENT
-# user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'
 
 # COOKIE
 cookie_value = 'BAQAAAYhF58hiAAaAADMABmZR5lkxMDExQUEAygAgaDMZ2TU4MjQ5YTYwMTg4MGEyYTU0NTk0MTIwMmZmZGRkNDUxAMsAAmRwueE0OLh6sarD+aIa8rO7kTBc1CmxGyWy'
@@ -32,7 +31,7 @@ cookie_value = 'BAQAAAYhF58hiAAaAADMABmZR5lkxMDExQUEAygAgaDMZ2TU4MjQ5YTYwMTg4MGE
 URL = "https://www.ebay.it/n/all-categories"
 
 HEADERS = ({
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36',
+    'User-Agent': scraping.generate_random_user_agent(),
     'Accept-Language': 'en-US, en;q=0.5'})
 # VARIABILI
 group_by_IVA = []

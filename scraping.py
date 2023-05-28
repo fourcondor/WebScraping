@@ -1,6 +1,13 @@
 import argparse
 import subprocess
 
+from fake_useragent import UserAgent
+
+
+def generate_random_user_agent():
+    ua = UserAgent()
+    return ua.random
+
 
 def main():
     # Definisci le opzioni da riga di comando
