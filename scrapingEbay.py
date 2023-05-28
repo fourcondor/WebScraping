@@ -234,5 +234,6 @@ if __name__ == '__main__':
             break
     file_name = file_name.replace(" ", "_")
     df.to_excel(f'reportEbay{file_name}.xlsx', index=False)
-    print("Aggiornamento file EXCEL...")
+    print(f"Aggiornamento file EXCEL...reportEbay{file_name}.xlsx")
+    scraping.formatta_file_excel(f'reportEbay{file_name}.xlsx')
     print("-------------DONE-----------------")
