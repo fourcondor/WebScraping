@@ -151,7 +151,10 @@ if __name__ == '__main__':
             except AttributeError as ae:
                 prezzo_consigliato = None
             # ESTRAZIONE nome prodotto
-            nome_prodotto = new_soup.find("span", attrs={"id": "productTitle"}).text.strip()
+            try:
+                nome_prodotto = new_soup.find("span", attrs={"id": "productTitle"}).text.strip()
+            except AttributeError as ae:
+                continue
             # ESTRAZIONE prezzo prodotto
             sconto = 0
             try:
