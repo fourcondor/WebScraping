@@ -1,6 +1,7 @@
 import openpyxl
 import argparse
 import subprocess
+import scrapEcommerce
 
 from fake_useragent import UserAgent
 

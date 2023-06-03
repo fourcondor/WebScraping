@@ -6,6 +6,7 @@ import re
 import html
 import unicodedata
 import scraping
+import scrapEcommerce
 
 # Crea il dizionario con gli attributi
 azienda = {
@@ -24,7 +25,8 @@ azienda = {
     'Numero di telefono:': '',
     'Indirizzo Servizio clienti:': '',
     'Indirizzo aziendale:': '',
-    'Emails': []
+    'Emails': [],
+    'E-commerce': []
 }
 
 # COOKIE
@@ -300,6 +302,11 @@ if __name__ == '__main__':
                     # Utilizza un'espressione regolare per trovare gli indirizzi email nel testo
                     email_regex = r'\b[-\s]?[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b'
                     azienda['Emails'] = re.findall(email_regex, decoded_html)
+                # E-COMMERCE
+                if azienda['Nome azienda:'] == 'Amazon':
+                    azienda['E-commerce'] = []
+                    azienda['E-commerce'] = scrapEcommerce.ricerca_e_commerce(nome_prodotto)
+                    print(f"PROVA E-COMMERCE {azienda['E-commerce']}")
                 print(azienda)
 
                 # Creazione di un DataFrame temporaneo con il dizionario azienda come riga
