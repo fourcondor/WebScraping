@@ -1,3 +1,4 @@
+import time
 import pandas as pd
 from bs4 import BeautifulSoup
 import csv
@@ -6,12 +7,24 @@ import re
 import html
 import unicodedata
 import scraping
-import scrapEcommerce
 
+url_categorie = {
+    'Bellezza': "https://www.amazon.it/s?rh=n%3A6306897031&fs=true&ref=lp_6306897031_sar",
+    'Fai da te': "https://www.amazon.it/s?rh=n%3A2454160031&fs=true&ref=lp_2454160031_sar",
+    'Cura della casa': "https://www.amazon.it/s?rh=n%3A6394759031&fs=true&ref=lp_6394759031_sar",
+    'Sport e tempo libero': "https://www.amazon.it/s?bbn=524012031&rh=n%3A26039477031&fs=true&ref=lp_26039477031_sar",
+    'Pulizie': "https://www.amazon.it/s?rh=n%3A6571987031&fs=true&ref=lp_6571987031_sar",
+    'Lavorazione': "https://www.amazon.it/s?rh=n%3A6306897031&fs=true&ref=lp_6306897031_sar",
+    'Attrezzatura': "https://www.amazon.it/s?rh=n%3A2565863031&fs=true&ref=lp_2565863031_sar",
+    'Creme': "https://www.amazon.it/s?k=creme&rh=n%3A6306897031&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&ref=nb_sb_noss",
+    'Siero': "https://www.amazon.it/s?k=siero&rh=n%3A6306897031&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&ref=nb_sb_noss",
+    'Brazz': "https://www.amazon.it/s?k=bracciolo+universale&rh=p_n_sb_certificate_id%3A75628273031&dc&__mk_it_IT=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=2N5HP5O7ZN1AH&qid=1688054828&rnid=75628272031&sprefix=bracciolo+universale%2Caps%2C106&ref=sr_nr_p_n_sb_certificate_id_1&ds=v1%3ATjYd6U8pAuRbXfWk8kA6ptMQbawBmJS1zfyZqssvjjM"
+}
 # Crea il dizionario con gli attributi
 azienda = {
     'ASIN': None,
     'Vetrina': None,
+    'Num prodotti vetrina': None,
     'Marca': None,
     'Nome prodotto': None,
     'Prezzo': None,
@@ -26,19 +39,27 @@ azienda = {
     'Indirizzo Servizio clienti:': '',
     'Indirizzo aziendale:': '',
     'Emails': [],
-    'E-commerce': []
 }
 
 # COOKIE
-cookie_value = 'BwymVMv/P2Jav0j43t2EhJ9u4wf1E8A8jnGcjlwYEJGfOEUTmSDRPDbIPa8RYLNPYWVycGokx8xDtuCKPCW+WxtnWyADWVblzvUXHS6zKP6T4cjo299cMfnX3NSRd2ZLrq5rrJEjEV2ONHlEiLw2x+LBdO/jDybV+QbVTX3b+H7GFXkcPBTvXUAK+OYSJQxZbmSKptlDSvPMXxkmmMtHBoa9WdZ/hp0o/zfurpDB4Wg='
+cookies = {
+    'csm-hit': 'tb:DFTKCNYKNH7A2VW3120N+s-DK2WVNN5SW86915YRB1E|1687968488201&t:1687968488201&adb:adblk_no',
+    'i18n-prefs': 'EUR',
+    'session-id': '257-6672538-7538018',
+    'session-id-time': '2082787201l',
+    'session-token': '"Y2CGecnFCiS9oTLHtZcVAFAVOn3RkjSsl4oVfVleDVNG48iCFmPm7r4eGhfWxwgOvxPgkd6ZbdrCjs3q5CzicB7Ty5weKrRMukumgONCkm8O08c6D6GlqkmebLLoQqtM2CBS6VUuw76vS6P8ZIiA8VBFiAKlS0gn0F7MoxfMAu2NvhLyTlylYU/2LM1hjuFpSkAYKf9qyLRGXj6M0ENl3nO+JcCzdqHK1z8xSFHN51Y="',
+    'ubid-acbit': '262-9912553-6719151'
+}
 
 URL = "https://www.amazon.it/b?ie=UTF8&node=13773664031"
 
 HEADERS = ({
     'User-Agent': scraping.generate_random_user_agent(),
+    'Cookie': '; '.join([f'{name}={value}' for name, value in cookies.items()]),
     'Accept-Language': 'en-US, en;q=0.5'})
 
 group_by_IVA = []
+group_by_vetrina = []
 
 
 # ----------------METHODS------------------
@@ -48,6 +69,29 @@ def is_solo_numero(variabile):
         return True
     except ValueError:
         return False
+
+
+def estrazioneNumProdotti(link_vetrina):
+    num_links = 0
+    new_link_vetrina = link_vetrina
+    print("Conteggio numero prodotti venduti dal venditore")
+    while True:
+        try:
+            link_v = "https://amazon.it" + new_link_vetrina
+            time.sleep(5)
+            vetrina = requests.get(link_v, headers=HEADERS)
+            prodotti_vetrina = BeautifulSoup(vetrina.content, "html.parser")
+            num_links_tmp = prodotti_vetrina.find_all("a", attrs={
+                'class': "a-link-normal s-underline-text s-underline-link-text s-link-style a-text-normal"})
+            num_links += len(num_links_tmp)
+            print(num_links)
+            new_url_link_vetrina = prodotti_vetrina.find("a", attrs={
+                'class': "s-pagination-item s-pagination-next s-pagination-button s-pagination-separator"})
+            new_link_vetrina = new_url_link_vetrina.get('href')
+        except AttributeError as ae:
+            break
+    print(f"NUMERO PRODOTTI VETRINA {num_links}")
+    return str(num_links)
 
 
 # Creazione di un DataFrame vuoto
@@ -60,22 +104,21 @@ def menu():
     global file_name
     print("HELLO MR. Scraper")
     print("Connecting to Amazon.it ...")
-    ebay = requests.get(URL, headers=HEADERS,
-                        cookies={'session-token': cookie_value})
-    categories = BeautifulSoup(ebay.content, "html.parser")
-    categories_links = categories.find_all("a", attrs={'class': "a-color-base a-link-normal"})
+
     i = 1
-    for categorie in categories_links:
-        print(f"Press {i} for {categorie.text.strip()}")
+    for categoria in url_categorie.keys():
+        print(f"Press {i} for {categoria}")
         i += 1
     choice = input()
     while not (is_solo_numero(choice) and 0 < int(choice) < i):
         print("WHAT ARE YOU DOING!")
         choice = input()
-    lista = list(categories_links)
-    print(f"Connecting to {lista[int(choice) - 1].get('href')}")
-    file_name = lista[int(choice) - 1].text.strip()
-    return lista[int(choice) - 1].get('href')
+    campi = url_categorie.keys()
+    result = url_categorie[list(campi)[int(choice) - 1]]
+    print(f"Connecting to {result}")
+    file_name = list(campi)[int(choice) - 1]
+    print(f"File generato reportAmazon{file_name}.xlsx")
+    return result
 
 
 def cerca_elemento(elemento, lista):
@@ -86,12 +129,16 @@ def cerca_elemento(elemento, lista):
 
 
 if __name__ == '__main__':
-    URL = "https://amazon.it" + menu()
+    URL = menu()
     print(f"---------------------------------CATGEGORIA {file_name}--------------------------------------------------")
+    num_records = 0
     while True:
         try:
-            webpage = requests.get(URL, headers=HEADERS,
-                                   cookies={'session-token': cookie_value})
+            if num_records > 100:
+                num_records = 0
+                print("Attendere qualche minuto ...")
+                time.sleep(500)
+            webpage = requests.get(URL, headers=HEADERS)
 
             # Parsing HTML
             soup = BeautifulSoup(webpage.content, "html.parser")
@@ -104,9 +151,12 @@ if __name__ == '__main__':
                 product_link = "https://amazon.it" + link
                 print(product_link)
                 # pagina web del prodotto i-esimo
-                product_webpage = requests.get(product_link, headers=HEADERS,
-                                               cookies={'session-token': cookie_value})
+                time.sleep(8)
+                print("Attendere...")
+
+                product_webpage = requests.get(product_link, headers=HEADERS)
                 new_soup = BeautifulSoup(product_webpage.content, "html.parser")
+                num_records += 1
                 # estrazione dei dati presenti nell pagina
                 # ESTRAZIONE ASIN
                 try:
@@ -213,15 +263,20 @@ if __name__ == '__main__':
                     seller_link = "https://amazon.it" + seller_link.get('href')
                     print(seller_link)
                     # PAGINA DEL VENDITORE
-                    seller_webpage = requests.get(seller_link, headers=HEADERS,
-                                                  cookies={'session-token': cookie_value})
+                    seller_webpage = requests.get(seller_link, headers=HEADERS)
                     new_soup = BeautifulSoup(seller_webpage.content, "html.parser")
                     # Vedo ESISTE la VETRINA del venditore
                     link_element = new_soup.find('a', string=lambda text: text and 'Vetrina' in text)
                     link_vetrina = None
                     if link_element:
                         link_vetrina = link_element.get('href')
+                        if cerca_elemento(link_vetrina, group_by_vetrina):
+                            continue
                         print(f"link vetrina {link_vetrina}")
+                        group_by_vetrina.append(link_vetrina)
+                        # Numerp di prodotti in vetrina
+                        num_prodotti_vetrina = None
+                        num_prodotti_vetrina = estrazioneNumProdotti(link_vetrina)
                     # Estraggo il NUMERO DI VALUTAZIONI del venditore
                     link_valutazioni = new_soup.find('a',
                                                      class_='a-link-normal feedback-detail-description no-text-decoration')
@@ -246,6 +301,7 @@ if __name__ == '__main__':
                     azienda['ASIN'] = asin
                     if link_element:
                         azienda['Vetrina'] = "https://amazon.it" + link_vetrina
+                        azienda['Num prodotti vetrina'] = num_prodotti_vetrina
                     azienda['Marca'] = marca
                     azienda['Nome prodotto'] = nome_prodotto
                     azienda['Prezzo'] = prezzo_prodotto
@@ -302,11 +358,6 @@ if __name__ == '__main__':
                     # Utilizza un'espressione regolare per trovare gli indirizzi email nel testo
                     email_regex = r'\b[-\s]?[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b'
                     azienda['Emails'] = re.findall(email_regex, decoded_html)
-                # E-COMMERCE
-                if azienda['Nome azienda:'] == 'Amazon':
-                    azienda['E-commerce'] = []
-                    azienda['E-commerce'] = scrapEcommerce.ricerca_e_commerce(nome_prodotto)
-                    print(f"PROVA E-COMMERCE {azienda['E-commerce']}")
                 print(azienda)
 
                 # Creazione di un DataFrame temporaneo con il dizionario azienda come riga
@@ -315,10 +366,10 @@ if __name__ == '__main__':
                 # Concatenazione del DataFrame temporaneo con il DataFrame principale
                 df = pd.concat([df, df_temp], ignore_index=True)
                 # Aggiungi il contenuto del dizionario al file CSV
-                filename = './reportAmazon.csv'  # Sostituisci con il nome del file desiderato
+                filename_csv = './reportAmazon.csv'  # Sostituisci con il nome del file desiderato
                 # ESPORTO DATI SIA IN .CSV che .XLSX
                 # .CSV
-                with open(filename, 'a', newline='', encoding='utf-8') as file:
+                with open(filename_csv, 'a', newline='', encoding='utf-8') as file:
                     writer = csv.DictWriter(file, fieldnames=azienda.keys())
 
                     if file.tell() == 0:  # Se il file è vuoto, scrivi l'intestazione
@@ -326,7 +377,7 @@ if __name__ == '__main__':
 
                     writer.writerow(azienda)  # Scrivi i dati del dizionario
 
-                print(f"Il contenuto del dizionario è stato aggiunto al file '{filename}' in formato CSV.")
+                print(f"Il contenuto del dizionario è stato aggiunto al file '{filename_csv}' in formato CSV.")
         except KeyboardInterrupt as ki:
             break
 
